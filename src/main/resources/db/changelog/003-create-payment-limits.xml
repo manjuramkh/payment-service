@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+            http://www.liquibase.org/xml/ns/dbchangelog
+            https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="create-payment-limits-table" author="ram">
+
+        <createTable tableName="payment_limits">
+
+            <!-- Primary Key -->
+            <column name="customer_id" type="CHAR(36)">
+                <constraints
+                        primaryKey="true"
+                        primaryKeyName="pk_payment_limits"
+                        nullable="false"/>
+            </column>
+
+            <!-- Payment Limits -->
+            <column name="daily_limit" type="DECIMAL(19,2)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="monthly_limit" type="DECIMAL(19,2)">
+                <constraints nullable="false"/>
+            </column>
+
+            <!-- Usage -->
+            <column name="used_today"
+                    type="DECIMAL(19,2)"
+                    defaultValueNumeric="0.00">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="used_month"
+                    type="DECIMAL(19,2)"
+                    defaultValueNumeric="0.00">
+                <constraints nullable="false"/>
+            </column>
+
+            <!-- Audit Fields -->
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="updated_at" type="TIMESTAMP"/>
+
+        </createTable>
+
+        <rollback>
+            <dropTable tableName="payment_limits"/>
+        </rollback>
+
+    </changeSet>
+
+</databaseChangeLog>

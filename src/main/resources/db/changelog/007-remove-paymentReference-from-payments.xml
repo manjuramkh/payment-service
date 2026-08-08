@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+        http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="007-remove-paymentReference-from-payments" author="payment-service">
+
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="payments"/>
+                <columnExists tableName="payments" columnName="paymentReference"/>
+            </and>
+        </preConditions>
+
+        <dropColumn tableName="payments" columnName="paymentReference"/>
+
+        <rollback>
+            <addColumn tableName="payments">
+                <column name="paymentReference" type="VARCHAR(50)"/>
+            </addColumn>
+        </rollback>
+
+    </changeSet>
+
+</databaseChangeLog>

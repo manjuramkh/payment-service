@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+            http://www.liquibase.org/xml/ns/dbchangelog
+            https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="create-payment-history-table" author="ram">
+
+        <createTable tableName="payment_history">
+
+            <column name="id" type="CHAR(36)">
+                <constraints
+                        primaryKey="true"
+                        primaryKeyName="pk_payment_history"
+                        nullable="false"/>
+            </column>
+
+            <column name="payment_id" type="CHAR(36)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="old_status" type="VARCHAR(30)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="new_status" type="VARCHAR(30)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="changed_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+
+        </createTable>
+
+        <!-- Index for finding history by payment -->
+        <createIndex
+                indexName="idx_payment_id"
+                tableName="payment_history">
+
+            <column name="payment_id"/>
+
+        </createIndex>
+
+        <!-- Index for sorting/filtering by change time -->
+        <createIndex
+                indexName="idx_changed_at"
+                tableName="payment_history">
+
+            <column name="changed_at"/>
+
+        </createIndex>
+
+        <rollback>
+
+            <dropTable tableName="payment_history"/>
+
+        </rollback>
+
+    </changeSet>
+
+</databaseChangeLog>
