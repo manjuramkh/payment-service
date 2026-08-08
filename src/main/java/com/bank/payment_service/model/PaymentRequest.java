@@ -7,8 +7,8 @@ import java.util.UUID;
 
 public record PaymentRequest(
         UUID transferId,
-        String sourceAccountId,
-        String destinationAccountId,
+        UUID sourceAccountId,
+        UUID destinationAccountId,
         BigDecimal amount,
         String currency,
         PaymentType paymentType,

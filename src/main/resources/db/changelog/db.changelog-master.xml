@@ -11,10 +11,9 @@
     <include file="db/changelog/002-create-payment-history.xml"/>
     <include file="db/changelog/003-create-payment-limits.xml"/>
     <include file="db/changelog/004-add-channel-to-payments.xml"/>
+<!--    <include file="db/changelog/005-insert-payment-data.xml"/>-->
     <include file="db/changelog/006-add-paymentReference-to-payments.xml"/>
     <include file="db/changelog/007-remove-paymentReference-from-payments.xml"/>
 
     <!--    <include file="db/changelog/003-add-payment-reference.xml"/>-->
-<!--    <include file="db/changelog/004-insert-payment-data.xml"/>-->
-
 </databaseChangeLog>

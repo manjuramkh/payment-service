@@ -1,6 +1,8 @@
 package com.bank.payment_service.service;
 
+import com.bank.payment_service.config.AccountClient;
 import com.bank.payment_service.domain.Payment;
+import com.bank.payment_service.domain.PaymentStatus;
 import com.bank.payment_service.model.AccountSummary;
 import com.bank.payment_service.model.PaymentDTO;
 import com.bank.payment_service.model.PaymentRequest;
@@ -8,8 +10,10 @@ import com.bank.payment_service.model.PaymentResponse;
 import com.bank.payment_service.repos.PaymentRepository;
 import com.bank.payment_service.util.NotFoundException;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.transaction.annotation.Transactional;
@@ -22,9 +26,11 @@ import org.springframework.stereotype.Service;
 public class PaymentService {
 
     private final PaymentRepository paymentRepository;
+    private final AccountClient accountClient;
 
-    public PaymentService(final PaymentRepository paymentRepository) {
+    public PaymentService(final PaymentRepository paymentRepository, final AccountClient accountClient) {
         this.paymentRepository = paymentRepository;
+        this.accountClient= accountClient;
     }
 
     public List<PaymentDTO> findAll() {
@@ -38,10 +44,37 @@ public class PaymentService {
         return null;
     }
 
-    public String create(final PaymentRequest paymentRequest) {
-//        paymentRepository.fin
+    public String create(final PaymentRequest paymentRequest) throws Exception {
+        Optional<Payment> existingPayment = paymentRepository.findById(paymentRequest.transferId());
 
-        return null;
+        if (existingPayment.isPresent()){
+            throw new Exception("Payment with transfer ID already exists.");
+        }
+
+        Payment payment = new Payment();
+        
+        String paymentReference = "PAY-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        
+        while (paymentReferenceExists(paymentReference)) {
+            paymentReference = "PAY-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        }
+
+        payment.setPaymentReference(paymentReference);
+        payment.setTransferId(paymentRequest.transferId());
+        payment.setSenderAccount(paymentRequest.sourceAccountId());
+        payment.setReceiverAccount(paymentRequest.destinationAccountId());
+        payment.setAmount(paymentRequest.amount());
+        payment.setCurrency(paymentRequest.currency());
+        payment.setPaymentType(paymentRequest.paymentType());
+        payment.setStatus(PaymentStatus.INITIATED);
+        payment.setChannel(paymentRequest.paymentType().toString());
+        payment.setRemarks(paymentRequest.remarks());
+        payment.setCreatedAt(Instant.now());
+        payment.setUpdatedAt(Instant.now());
+        
+        paymentRepository.save(payment);
+        
+        return paymentReference;
     }
 
     public List<PaymentResponse> getAllPayments(){
@@ -50,22 +83,27 @@ public class PaymentService {
             throw new NotFoundException("There are No Payments.");
         }
 
+//        accountClient.getAccountDetails(payments.stream()
+//                                                .map(Payment::getSenderAccount));
+
         List<PaymentResponse> paymentResponses = new ArrayList<>();
 
         for (Payment payment : payments){
-             PaymentResponse paymentResponse = new PaymentResponse(
+            AccountSummary accountSummary1 = accountClient.getAccountDetails(payment.getSenderAccount());
+            AccountSummary accountSummary2 = accountClient.getAccountDetails(payment.getReceiverAccount());
+            PaymentResponse paymentResponse = new PaymentResponse(
                      payment.getId(),
                      payment.getPaymentReference(),
                      payment.getTransferId(),
                      new AccountSummary(
-                             payment.getSenderAccount(),
-                             null,
-                             null
+                             accountSummary1.accountId(),
+                             accountSummary1.accountNumber(),
+                             accountSummary1.accountHolderName()
                      ),
                      new AccountSummary(
-                             payment.getReceiverAccount(),
-                             null,
-                             null
+                             accountSummary2.accountId(),
+                             accountSummary2.accountNumber(),
+                             accountSummary2.accountHolderName()
                      ),
                      payment.getAmount(),
                      payment.getCurrency(),

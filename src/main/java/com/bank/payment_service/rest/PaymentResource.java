@@ -30,7 +30,7 @@ public class PaymentResource {
     }
 
     @PostMapping("/payment")
-    public ResponseEntity<String> createPayment(@RequestBody PaymentRequest paymentRequest){
+    public ResponseEntity<String> createPayment(@RequestBody PaymentRequest paymentRequest) throws Exception {
         String msg = paymentService.create(paymentRequest);
         log.info("Payment has been created.");
         return new ResponseEntity<>(msg, HttpStatus.CREATED);
