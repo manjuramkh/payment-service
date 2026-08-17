@@ -7,15 +7,12 @@ import com.bank.payment_service.service.PaymentService;
 import java.util.List;
 import java.util.UUID;
 
+import com.bank.payment_service.util.InvalidIdempotencyKeyException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
 @Slf4j
@@ -30,15 +27,22 @@ public class PaymentResource {
     }
 
     @PostMapping("/payment")
-    public ResponseEntity<String> createPayment(@RequestBody PaymentRequest paymentRequest) throws Exception {
-        String msg = paymentService.create(paymentRequest);
+    public ResponseEntity<PaymentResponse> createPayment(
+            @RequestBody PaymentRequest paymentRequest,
+            @RequestHeader("Idempotency-Key") String idempotencyKey) throws Exception {
+
+        if (idempotencyKey.isEmpty()) {
+            throw new InvalidIdempotencyKeyException("Idempotency-Key header is required.");
+        }
+        PaymentResponse paymentResponse = paymentService.create(paymentRequest, idempotencyKey);
         log.info("Payment has been created.");
-        return new ResponseEntity<>(msg, HttpStatus.CREATED);
+        return new ResponseEntity<>(paymentResponse, HttpStatus.CREATED);
+
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<PaymentResponse> getPayment(UUID id){
-        PaymentResponse paymentResponse =  paymentService.get(id);
+        PaymentResponse paymentResponse =  paymentService.getPayment(id);
         log.info("Payment details of id: "+paymentResponse.paymentId());
         return new ResponseEntity<>(paymentResponse, HttpStatus.OK);
     }

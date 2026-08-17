@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+        http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="005-create-idempotency-records"
+               author="payment-service">
+
+        <createTable tableName="idempotency_records">
+
+            <column name="id" type="CHAR(36)">
+                <constraints
+                        primaryKey="true"
+                        nullable="false"/>
+            </column>
+
+            <column name="idempotency_key"
+                    type="VARCHAR(100)">
+                <constraints
+                        nullable="false"
+                        unique="true"/>
+            </column>
+
+            <column name="request_hash"
+                    type="VARCHAR(64)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="payment_id"
+                    type="CHAR(36)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="status"
+                    type="VARCHAR(30)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created_at"
+                    type="DATETIME(6)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="expires_at"
+                    type="DATETIME(6)"/>
+
+        </createTable>
+
+        <createIndex
+                tableName="idempotency_records"
+                indexName="idx_idempotency_payment_id">
+
+            <column name="payment_id"/>
+
+        </createIndex>
+
+    </changeSet>
+
+</databaseChangeLog>

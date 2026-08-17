@@ -16,5 +16,7 @@ public enum PaymentStatus {
 
     REVERSED,
 
-    CANCELLED
+    CANCELLED,
+
+    PENDING
 }
