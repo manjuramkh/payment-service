@@ -306,10 +306,7 @@ public class PaymentService {
         if (record.getStatus() ==
                 IdempotencyStatus.PROCESSING) {
 
-            throw new IdempotencyConflictException(
-                    "A request with this Idempotency-Key "
-                            + "is already being processed."
-            );
+            throw new IdempotencyConflictException("A request with this Idempotency-Key is already being processed.");
         }
 
 
